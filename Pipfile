@@ -7,6 +7,7 @@ name = "pypi"
 lxml = "*"
 pandas = "*"
 numpy = "*"
+pandas-gbq = "*"
 
 [dev-packages]
 

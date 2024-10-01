@@ -2,11 +2,14 @@ import sys
 from io import StringIO
 
 import pandas as pd
+import pandas_gbq
 
 
 class StackOverflowDump:
-    def __init__(self, filename, root_name, batch_size):
+    def __init__(self, filename, root_name, batch_size, backend):
+        self.prefix = "stackoverflow"
         self.filename = filename
+        self.backend = backend
         self.root = root_name
         self.root_open = f"<{root_name}>"
         self.root_close = f"</{root_name}>"
@@ -24,16 +27,28 @@ class StackOverflowDump:
         )
 
     def flush(self):
+        def preserve_newlines(value):
+            if isinstance(value, str):
+                return value.replace("\n", "\\n")
+            return value
+
         xml = self.template.format(xml="".join(self.current_batch))
-        df = pd.read_xml(StringIO(xml))
-        csv_string = StringIO()
-        # print(f"Using header={keep_headers}")
-        df.to_csv(csv_string, header=self.keep_headers, index=False)
+        df = pd.read_xml(StringIO(xml), converters={"Body": preserve_newlines})
+        if self.backend == "csv":
+            csv_string = StringIO()
+            df.to_csv(csv_string, header=self.keep_headers, index=False)
+            with open(f"{self.root}.csv", "a") as g:
+                g.write(csv_string.getvalue())
+        elif self.backend == "bq":
+            pandas_gbq.to_gbq(
+                df,
+                f"stackexchange.{self.prefix}_{self.root}",
+                project_id="social-computing-436902",
+                if_exists="append",
+            )
         if self.batch_number == 0:
             self.keep_headers = False
 
-        with open(f"{self.root}.csv", "a") as g:
-            g.write(csv_string.getvalue())
         self.current_batch = []
 
     def convert_to_csv(self):
@@ -41,7 +56,7 @@ class StackOverflowDump:
             for i, line in enumerate(f):
                 # Skip first two lines
                 if i > 1 and self.root_close not in line:
-                    self.current_batch.append(line)
+                    self.current_batch.append(line.rstrip())
                     if len(self.current_batch) == self.batch_size:
                         self.flush()
                         sys.stdout.write(f"\rFlushed batch {self.batch_number}")
