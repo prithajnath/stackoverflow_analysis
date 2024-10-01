@@ -7,6 +7,7 @@ class TestStackOverflow:
     def test_ok(self, stackoverflow_csv_dumper):
         filename = stackoverflow_csv_dumper.convert_to_csv()
 
-        df = pd.read_csv(filename)
+        df1 = pd.read_xml("tests/test_Posts.xml")
+        df2 = pd.read_csv(filename)
 
-        assert df["Score"].sum() == 110
+        assert df1["Score"].sum() == df2["Score"].sum()
