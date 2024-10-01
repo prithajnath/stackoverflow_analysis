@@ -1,6 +1,6 @@
 from stackexchangedump import StackOverflowDump
 
-BATCH_SIZE = 10_000
+BATCH_SIZE = 6
 
 
 if __name__ == "__main__":

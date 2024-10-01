@@ -8,6 +8,7 @@ lxml = "*"
 pandas = "*"
 numpy = "*"
 pandas-gbq = "*"
+pytest = "*"
 
 [dev-packages]
 

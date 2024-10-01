@@ -24,3 +24,11 @@
 ## EDA workflow
 
 We can use the Python BigQuery client to load data from our BigQuery warehouse into a Jupyter notebook. We can leave all the heavy-lifting jobs like sampling, joins and aggregations to BigQuery (via BigQuery SQL) and keep our Python analysis simple and easier to work with.
+
+## Running tests
+
+Run the test suite with the following command
+
+```
+python -m pytest -vs
+```

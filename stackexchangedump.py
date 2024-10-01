@@ -6,9 +6,10 @@ import pandas_gbq
 
 
 class StackOverflowDump:
-    def __init__(self, filename, root_name, batch_size, backend):
+    def __init__(self, filename, root_name, batch_size, backend, output=None):
         self.prefix = "stackoverflow"
         self.filename = filename
+        self.output = f"{root_name}.csv" if not output else output
         self.backend = backend
         self.root = root_name
         self.root_open = f"<{root_name}>"
@@ -37,7 +38,7 @@ class StackOverflowDump:
         if self.backend == "csv":
             csv_string = StringIO()
             df.to_csv(csv_string, header=self.keep_headers, index=False)
-            with open(f"{self.root}.csv", "a") as g:
+            with open(self.output, "a") as g:
                 g.write(csv_string.getvalue())
         elif self.backend == "bq":
             pandas_gbq.to_gbq(
@@ -51,7 +52,7 @@ class StackOverflowDump:
 
         self.current_batch = []
 
-    def convert_to_csv(self):
+    def convert_to_csv(self) -> str:
         with open(self.filename, "r") as f:
             for i, line in enumerate(f):
                 # Skip first two lines
@@ -65,3 +66,5 @@ class StackOverflowDump:
             # Flush everything in buffer
             print(f"flushing last time...")
             self.flush()
+
+        return self.output
