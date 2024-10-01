@@ -4,7 +4,7 @@
 
 1. Download data as .7z files and extract them
 2. Use the `app.py` script to convert the XML file into a CSV
-3. Use [dbcrossbar](https://www.dbcrossbar.org/) to dump the CSV into BigQuery
+3. Use [dbcrossbar](https://www.dbcrossbar.org/) to dump the CSV into BigQuery (or some other warehouse like RedShift etc). Most warehouses have good connectors for Python
 
    - dbcrossbar is a Rust command line tool written by a former co-worker of mine. The interface is kinda wonky but it works great for large volumnes of data. It uses CSV as its "interchange format" to move data around, hence the `app.py` script. Once we have a valid CSV, we can use dbrossbar to upsert to a BigQuery table. It should be able to handle data of this scale
 
@@ -19,7 +19,7 @@
     bigquery:social-computing-436902:stackexchange.posts
    ```
 
-   If this doesn't work, we can look some other options (Spark?)
+   If this doesn't work, we can look at other options (Spark?)
 
 ## EDA workflow
 
