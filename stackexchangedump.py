@@ -1,13 +1,66 @@
 import sys
 from io import StringIO
+from collections import defaultdict
+from typing import Optional
 
 import pandas as pd
 import pandas_gbq
+import xml.etree.ElementTree as ET
+from abc import ABC, abstractmethod
+
+
+class StackExchangeParser(ABC):
+    @abstractmethod
+    def parse(cls, xml) -> dict:
+        pass
+
+
+class StackOverflowPostParser(StackExchangeParser):
+    @classmethod
+    def parse(cls, xml: str) -> dict:
+        root = ET.fromstring(xml)
+
+        result = defaultdict(list)
+        for row in root:
+            for attribute in [
+                "Id",
+                "PostTypeId",
+                "AcceptedAnswerId",
+                "CreationDate",
+                "Score",
+                "ViewCount",
+                "Body",
+                "OwnerUserId",
+                "LastEditorUserId",
+                "LastEditorDisplayName",
+                "LastEditDate",
+                "LastActivityDate",
+                "Title",
+                "Tags",
+                "AnswerCount",
+                "CommentCount",
+                "FavoriteCount",
+                "ParentId",
+                "OwnerDisplayName",
+            ]:
+                value = row.attrib.get(attribute, "")
+                result[attribute].append(value)
+
+        return result
 
 
 class StackOverflowDump:
-    def __init__(self, filename, root_name, batch_size, backend, output=None):
+    def __init__(
+        self,
+        filename,
+        root_name,
+        batch_size,
+        backend,
+        output=None,
+        parser: Optional[StackExchangeParser] = None,
+    ):
         self.prefix = "stackoverflow"
+        self.parser = parser
         self.filename = filename
         self.output = f"{root_name}.csv" if not output else output
         self.backend = backend
@@ -34,7 +87,10 @@ class StackOverflowDump:
             return value
 
         xml = self.template.format(xml="".join(self.current_batch))
-        df = pd.read_xml(StringIO(xml), converters={"Body": preserve_newlines})
+        if self.parser:
+            df = pd.DataFrame(self.parser.parse(xml))
+        else:
+            df = pd.read_xml(StringIO(xml), converters={"Body": preserve_newlines})
         if self.backend == "csv":
             csv_string = StringIO()
             df.to_csv(csv_string, header=self.keep_headers, index=False)

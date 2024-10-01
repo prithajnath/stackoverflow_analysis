@@ -4,7 +4,7 @@ import os
 
 from collections import namedtuple
 from tempfile import NamedTemporaryFile
-from stackexchangedump import StackOverflowDump
+from stackexchangedump import StackOverflowDump, StackOverflowPostParser
 
 
 @pytest.fixture(scope="session")
@@ -25,6 +25,7 @@ def stackoverflow_csv_dumper(stackoverflow_posts):
             batch_size=6,
             backend="csv",
             output=f"{f.name}.csv",
+            parser=StackOverflowPostParser,
         )
 
         yield so_dumper
