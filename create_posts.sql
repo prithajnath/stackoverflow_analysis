@@ -1,0 +1,25 @@
+CREATE TABLE Posts (
+    "Id" BIGINT,
+    "PostTypeId" INT,
+    "AcceptedAnswerId" NUMERIC,
+    "CreationDate" TIMESTAMP,
+    "Score" INT,
+    "ViewCount" NUMERIC,
+    "Body" TEXT,
+    "OwnerUserId" NUMERIC,
+    "OwnerDisplayName" TEXT,
+    "LastEditorUserId" NUMERIC,
+    "LastEditorDisplayName" TEXT,
+    "LastEditDate" TIMESTAMP,
+    "LastActivityDate" TIMESTAMP,
+    "Title" TEXT,
+    "Tags" TEXT,
+    "AnswerCount" NUMERIC,
+    "CommentCount" NUMERIC,
+    "FavoriteCount" NUMERIC,
+    "ContentLicense" TEXT,
+    "ParentId" NUMERIC,
+    "CommunityOwnedDate" TIMESTAMP,
+    "ClosedDate" TIMESTAMP
+);
+

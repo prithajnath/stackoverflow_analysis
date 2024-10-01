@@ -28,7 +28,7 @@ class StackOverflowDump:
         df = pd.read_xml(StringIO(xml))
         csv_string = StringIO()
         # print(f"Using header={keep_headers}")
-        df.to_csv(csv_string, header=self.keep_headers)
+        df.to_csv(csv_string, header=self.keep_headers, index=False)
         if self.batch_number == 0:
             self.keep_headers = False
 
