@@ -2,3 +2,4 @@
 *.csv
 *.xml
 *.json
+!test_Posts.xml

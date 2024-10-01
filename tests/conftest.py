@@ -9,7 +9,7 @@ from stackexchangedump import StackOverflowDump
 
 @pytest.fixture(scope="session")
 def stackoverflow_posts():
-    filename = os.path.join("tests", "Posts.xml")
+    filename = os.path.join("tests", "test_Posts.xml")
     root = "posts"
 
     StackOverflow = namedtuple("StackOverflow", ["filename", "root"])
