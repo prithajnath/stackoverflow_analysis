@@ -1,11 +1,15 @@
-from stackexchangedump import StackOverflowDump
+from stackexchangedump import StackOverflowDump, StackOverflowPostParser
 
 BATCH_SIZE = 6
 
 
 if __name__ == "__main__":
     post_dump = StackOverflowDump(
-        filename="Posts.xml", root_name="posts", batch_size=BATCH_SIZE, backend="csv"
+        filename="Posts.xml",
+        root_name="posts",
+        batch_size=BATCH_SIZE,
+        backend="csv",
+        parser=StackOverflowPostParser,
     )
 
     post_dump.convert_to_csv()

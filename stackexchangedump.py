@@ -22,28 +22,35 @@ class StackOverflowPostParser(StackExchangeParser):
 
         result = defaultdict(list)
         for row in root:
-            for attribute in [
-                "Id",
-                "PostTypeId",
-                "AcceptedAnswerId",
-                "CreationDate",
-                "Score",
-                "ViewCount",
-                "Body",
-                "OwnerUserId",
-                "LastEditorUserId",
-                "LastEditorDisplayName",
-                "LastEditDate",
-                "LastActivityDate",
-                "Title",
-                "Tags",
-                "AnswerCount",
-                "CommentCount",
-                "FavoriteCount",
-                "ParentId",
-                "OwnerDisplayName",
+            for attribute, attribute_type in [
+                ("Id", int),
+                ("PostTypeId", int),
+                ("AcceptedAnswerId", float),
+                ("CreationDate", str),
+                ("Score", float),
+                ("ViewCount", float),
+                ("Body", str),
+                ("OwnerUserId", int),
+                ("LastEditorUserId", int),
+                ("LastEditorDisplayName", str),
+                ("LastEditDate", str),
+                ("LastActivityDate", str),
+                ("Title", str),
+                ("Tags", str),
+                ("AnswerCount", float),
+                ("CommentCount", float),
+                ("FavoriteCount", float),
+                ("ParentId", int),
+                ("OwnerDisplayName", str),
             ]:
-                value = row.attrib.get(attribute, "")
+                value = row.attrib.get(attribute)
+                if value is not None and not isinstance(value, attribute_type):
+                    try:
+                        attribute_type(value)
+                    except:
+                        raise ValueError(
+                            f"field {attribute} expected {attribute_type} but got {value}"
+                        )
                 result[attribute].append(value)
 
         return result
@@ -93,7 +100,7 @@ class StackOverflowDump:
             df = pd.read_xml(StringIO(xml), converters={"Body": preserve_newlines})
         if self.backend == "csv":
             csv_string = StringIO()
-            df.to_csv(csv_string, header=self.keep_headers, index=False)
+            df.to_csv(csv_string, header=self.keep_headers, index=False, na_rep="")
             with open(self.output, "a") as g:
                 g.write(csv_string.getvalue())
         elif self.backend == "bq":
