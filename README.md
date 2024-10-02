@@ -8,18 +8,19 @@
 
    - dbcrossbar is a Rust command line tool written by a former co-worker of mine. The interface is kinda wonky but it works great for large volumnes of data. It uses CSV as its "interchange format" to move data around, hence the `app.py` script. Once we have a valid CSV, we can use dbrossbar to upsert to a BigQuery table. It should be able to handle data of this scale
 
-   Copying our CSVs to BigQuery should look something like this
+   So a basic pipeline looks like this now
 
    ```
-   dbcrossbar cp \
-    --if-exists=overwrite \
-    --temporary=gs://stackexchange_bucket/stackoverflow \
-    --schema=postgres-sql:create_posts.sql \
-    csv:posts.csv \
-    bigquery:social-computing-436902:stackexchange.posts
+   $ python app.py
+   WARNING: writing without headers
+   Picking up batch 2077 from 2024-10-01 21:46:10.993452
+   Flushed batch 2552^C(stackoverflow_analysis)
+   $ ./move_to_bq.sh
    ```
 
-   If this doesn't work, we can look at other options (Spark?)
+   The `move_to_bq.sh` uses `dbcrossbar` to chunk big `post.csv` CSV file into smaller files and streams them to Google Cloud storage bucket, and then copies them into a single BigQuery table. The `app.py` script can be interrupted with a Ctrl + C if you wish to stop and save progress. When you run the script again it should pick up from where it left off. The script uses a `*_progress.csv` file to keep track of interrupts. Make sure your `posts.csv` and `posts_progress.csv` files are in sync if you wish to start from where you left off. Otherwise you can start from scratch by removing both files
+
+   The `move_to_bq.sh` script will UPSERT all the data so you can run it as many times as you want without worrying about creating duplicate rows
 
 ## EDA workflow
 
