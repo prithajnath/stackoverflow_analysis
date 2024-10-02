@@ -1,5 +1,3 @@
-from stackexchangedump import StackOverflowDump
-
 import pandas as pd
 
 

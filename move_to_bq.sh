@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
    dbcrossbar cp \
-    --if-exists=overwrite \
+    --if-exists=upsert-on:Id \
     --temporary=gs://stackexchange_bucket/stackoverflow \
-    --schema=bigquery-schema:table.json \
+    --schema=postgres-sql:create_posts.sql \
     csv:posts.csv \
-    bigquery:social-computing-436902:stackexchange.posts
+    bigquery:social-computing-436902:stackexchange.stackoverflow_posts

@@ -1,9 +1,9 @@
-import pytest
 import os
-
-
 from collections import namedtuple
 from tempfile import NamedTemporaryFile
+
+import pytest
+
 from stackexchangedump import StackOverflowDump, StackOverflowPostParser
 
 
@@ -26,6 +26,22 @@ def stackoverflow_csv_dumper(stackoverflow_posts):
             backend="csv",
             output=f"{f.name}.csv",
             parser=StackOverflowPostParser,
+        )
+
+        yield so_dumper
+
+
+@pytest.fixture(scope="session")
+def stackoverflow_csv_dumper_with_progress_and_parser(stackoverflow_posts):
+    with NamedTemporaryFile("a") as f:
+        so_dumper = StackOverflowDump(
+            filename=stackoverflow_posts.filename,
+            root_name=stackoverflow_posts.root,
+            batch_size=1,
+            backend="csv",
+            output=f"{f.name}.csv",
+            parser=StackOverflowPostParser,
+            progress=True,
         )
 
         yield so_dumper
