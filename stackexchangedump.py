@@ -62,7 +62,9 @@ class StackOverflowPostParser(StackExchangeParser):
                             f"field {attribute} expected {attribute_type} but got {value}"
                         )
                 if attribute == "Body":
-                    value = value.replace("\n", "\\n")
+                    # escape crlf
+                    value = value.replace("\n", "\\n").replace("\r", "\\r")
+
                 result[attribute].append(value)
 
         return result
