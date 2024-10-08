@@ -91,7 +91,6 @@ class StackOverflowDump:
         self.root_open = f"<{root_name}>"
         self.root_close = f"</{root_name}>"
         self.batch_size = batch_size
-        self.keep_headers = True
         self.batch_number = 0
         self.current_batch = []
         self.template = (
@@ -123,19 +122,21 @@ class StackOverflowDump:
                 project_id="social-computing-436902",
                 if_exists="append",
             )
-        if self.batch_number == 0:
-            self.keep_headers = False
 
         self.current_batch = []
+
+    @property
+    def keep_headers(self) -> bool:
+        if self.output in os.listdir("."):
+            return False
+        return True
 
     def convert_to_csv(self) -> str:
         offset = None
         if self.progress:
             if last_saved := self.get_last_progress():
                 _, offset, ts = last_saved
-                # if we have found last saved progress. Assume a file with headers already exists
-                print(f"WARNING: writing without headers")
-                self.keep_headers = False
+
                 print(f"Picking up batch {offset} from {ts}")
 
         with open(self.filename, "r") as f:
