@@ -11,6 +11,8 @@ from typing import Optional, Tuple
 import pandas as pd
 import pandas_gbq
 
+from create_logger import logger
+
 
 class StackExchangeParser(ABC):
     @abstractmethod
@@ -137,7 +139,7 @@ class StackOverflowDump:
             if last_saved := self.get_last_progress():
                 _, offset, ts = last_saved
 
-                print(f"Picking up batch {offset} from {ts}")
+                logger.info(f"Picking up batch {offset} from {ts}")
 
         with open(self.filename, "r") as f:
             for i, line in enumerate(f):
@@ -163,7 +165,7 @@ class StackOverflowDump:
                             self.batch_number += 1
 
             # Flush everything in buffer
-            print(f"flushing last time...")
+            logger.info(f"flushing last time...")
             self.flush()
 
         return self.output
