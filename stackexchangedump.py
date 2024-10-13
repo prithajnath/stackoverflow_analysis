@@ -20,6 +20,50 @@ class StackExchangeParser(ABC):
         pass
 
 
+class StackOverflowUserParser(StackExchangeParser):
+
+    SCHEMA = [
+        ("Id", int),
+        ("Reputation", int),
+        ("CreationDate", str),
+        ("DisplayName", str),
+        ("LastAccessDate", str),
+        ("WebsiteUrl", str),
+        ("Location", str),
+        ("AboutMe", str),
+        ("Views", int),
+        ("UpVotes", int),
+        ("DownVotes", int),
+        ("ProfileImageUrl", str),
+        ("EmailHash", str),
+        ("AccountId", int),
+    ]
+
+    @classmethod
+    def parse(cls, xml: str) -> dict:
+        root = ET.fromstring(xml)
+
+        result = defaultdict(list)
+        for row in root:
+            for attribute, attribute_type in cls.SCHEMA:
+                # setting Nones to 0 so pandas reads them as int not floats
+                value = row.attrib.get(attribute, "" if attribute_type is str else 0)
+                if value is not None and not isinstance(value, attribute_type):
+                    try:
+                        value = attribute_type(value)
+                    except:
+                        raise ValueError(
+                            f"field {attribute} expected {attribute_type} but got {value}"
+                        )
+                if attribute == "AboutMe":
+                    # escape crlf
+                    value = value.replace("\n", "\\n").replace("\r", "\\r")
+
+                result[attribute].append(value)
+
+        return result
+
+
 class StackOverflowPostParser(StackExchangeParser):
 
     SCHEMA = [

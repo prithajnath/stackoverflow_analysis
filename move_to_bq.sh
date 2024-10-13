@@ -5,6 +5,6 @@
 dbcrossbar cp \
     --if-exists=upsert-on:Id \
     --temporary=gs://stackexchange_bucket/stackoverflow \
-    --schema=postgres-sql:create_$1.sql \
+    --schema=postgres-sql:ddl/create_$1.sql \
     csv:$1.csv \
     bigquery:social-computing-436902:stackexchange.stackoverflow_$1

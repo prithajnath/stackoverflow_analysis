@@ -2,7 +2,11 @@ import argparse
 import signal
 
 from create_logger import logger
-from stackexchangedump import StackOverflowDump, StackOverflowPostParser
+from stackexchangedump import (
+    StackOverflowDump,
+    StackOverflowPostParser,
+    StackOverflowUserParser,
+)
 
 BATCH_SIZE = 1000
 
@@ -14,7 +18,7 @@ SCHEMA_MAP = {
     "badges": "Badges.xml",
 }
 
-PARSER_MAP = {"posts": StackOverflowPostParser}
+PARSER_MAP = {"posts": StackOverflowPostParser, "users": StackOverflowUserParser}
 
 
 if __name__ == "__main__":
@@ -33,7 +37,8 @@ if __name__ == "__main__":
     filename = SCHEMA_MAP[schema]
     schema_parser = PARSER_MAP.get(schema)
 
-    logger.setLevel(log_level)
+    if log_level:
+        logger.setLevel(log_level)
     logger.info(f"Dumping {filename} to CSV")
 
     schema_dump = StackOverflowDump(
@@ -45,7 +50,8 @@ if __name__ == "__main__":
         progress=True,
     )
 
-    # register handlers for SIGINT, SIGKILL etc. This is to save our progress when we Ctrl + C or get killed by OS etc
+    # register handlers for SIGINT and SIGTERM . This is to save our progress when we Ctrl + C or get killed by OS etc
     signal.signal(signal.SIGINT, schema_dump.write_to_progress_file)
+    signal.signal(signal.SIGTERM, schema_dump.write_to_progress_file)
 
     schema_dump.convert_to_csv()
