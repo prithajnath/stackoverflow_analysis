@@ -1,5 +1,6 @@
 .env
-*.csv
+data/*.csv
+data/old/*.csv
 *.xml
 *.json
 __pycache__/
