@@ -5,6 +5,7 @@ from create_logger import logger
 from stackexchangedump import (
     StackOverflowDump,
     StackOverflowPostParser,
+    StackOverflowTagParser,
     StackOverflowUserParser,
 )
 
@@ -18,7 +19,11 @@ SCHEMA_MAP = {
     "badges": "Badges.xml",
 }
 
-PARSER_MAP = {"posts": StackOverflowPostParser, "users": StackOverflowUserParser}
+PARSER_MAP = {
+    "posts": StackOverflowPostParser,
+    "users": StackOverflowUserParser,
+    "tags": StackOverflowTagParser,
+}
 
 
 if __name__ == "__main__":
