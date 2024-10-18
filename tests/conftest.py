@@ -26,6 +26,7 @@ def stackoverflow_csv_dumper(stackoverflow_posts):
             backend="csv",
             output=f"{f.name}.csv",
             parser=StackOverflowPostParser,
+            tempfile_path=f.name,
         )
 
         yield so_dumper
@@ -42,6 +43,7 @@ def stackoverflow_csv_dumper_with_progress_and_parser(stackoverflow_posts):
             output=f"{f.name}.csv",
             parser=StackOverflowPostParser,
             progress=True,
+            tempfile_path=f.name,
         )
 
         yield so_dumper

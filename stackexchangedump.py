@@ -20,7 +20,39 @@ class StackExchangeParser(ABC):
         pass
 
 
-class StackOverflowUserParser(StackExchangeParser):
+class StackOverflowCRLFParser(StackExchangeParser):
+
+    SCHEMA: list[Tuple] = []
+    CRLF_COL = ""
+
+    @classmethod
+    def parse(cls, xml: str) -> dict:
+        root = ET.fromstring(xml)
+
+        result = defaultdict(list)
+        for row in root:
+            for attribute, attribute_type in cls.SCHEMA:
+                # setting Nones to 0 so pandas reads them as int not floats
+                value = row.attrib.get(attribute, "" if attribute_type is str else 0)
+                if value is not None and not isinstance(value, attribute_type):
+                    try:
+                        value = attribute_type(value)
+                    except:
+                        raise ValueError(
+                            f"field {attribute} expected {attribute_type} but got {value}"
+                        )
+                if attribute == cls.CRLF_COL:
+                    # escape crlf
+                    value = value.replace("\n", "\\n").replace("\r", "\\r")
+
+                result[attribute].append(value)
+
+        return result
+
+
+class StackOverflowUserParser(StackOverflowCRLFParser):
+
+    CRLF_COL = "AboutMe"
 
     SCHEMA = [
         ("Id", int),
@@ -39,32 +71,10 @@ class StackOverflowUserParser(StackExchangeParser):
         ("AccountId", int),
     ]
 
-    @classmethod
-    def parse(cls, xml: str) -> dict:
-        root = ET.fromstring(xml)
 
-        result = defaultdict(list)
-        for row in root:
-            for attribute, attribute_type in cls.SCHEMA:
-                # setting Nones to 0 so pandas reads them as int not floats
-                value = row.attrib.get(attribute, "" if attribute_type is str else 0)
-                if value is not None and not isinstance(value, attribute_type):
-                    try:
-                        value = attribute_type(value)
-                    except:
-                        raise ValueError(
-                            f"field {attribute} expected {attribute_type} but got {value}"
-                        )
-                if attribute == "AboutMe":
-                    # escape crlf
-                    value = value.replace("\n", "\\n").replace("\r", "\\r")
+class StackOverflowPostParser(StackOverflowCRLFParser):
 
-                result[attribute].append(value)
-
-        return result
-
-
-class StackOverflowPostParser(StackExchangeParser):
+    CRLF_COL = "Body"
 
     SCHEMA = [
         ("Id", int),
@@ -91,29 +101,18 @@ class StackOverflowPostParser(StackExchangeParser):
         ("ClosedDate", str),
     ]
 
-    @classmethod
-    def parse(cls, xml: str) -> dict:
-        root = ET.fromstring(xml)
 
-        result = defaultdict(list)
-        for row in root:
-            for attribute, attribute_type in cls.SCHEMA:
-                # setting Nones to 0 so pandas reads them as int not floats
-                value = row.attrib.get(attribute, "" if attribute_type is str else 0)
-                if value is not None and not isinstance(value, attribute_type):
-                    try:
-                        value = attribute_type(value)
-                    except:
-                        raise ValueError(
-                            f"field {attribute} expected {attribute_type} but got {value}"
-                        )
-                if attribute == "Body":
-                    # escape crlf
-                    value = value.replace("\n", "\\n").replace("\r", "\\r")
-
-                result[attribute].append(value)
-
-        return result
+class StackOverflowTagParser(StackOverflowCRLFParser):
+    CRLF_COL = "TagName"
+    SCHEMA = [
+        ("Id", int),
+        ("TagName", str),
+        ("Count", int),
+        ("ExcerptPostId", int),
+        ("WikiPostId", int),
+        ("IsModeratorOnly", bool),
+        ("IsRequired", bool),
+    ]
 
 
 class StackOverflowDump:
@@ -126,6 +125,7 @@ class StackOverflowDump:
         sep,
         output=None,
         parser: Optional[StackExchangeParser] = None,
+        tempfile_path: Optional[str] = None,
         progress=False,
     ):
         self.prefix = "stackoverflow"
@@ -140,6 +140,7 @@ class StackOverflowDump:
         self.root_close = f"</{root_name}>"
         self.batch_size = batch_size
         self.batch_number = 0
+        self.tempfile_path = tempfile_path
         self.current_batch = []
         self.template = (
             f"""<?xml version="1.0" encoding="utf-8"?>
@@ -186,6 +187,13 @@ class StackOverflowDump:
 
     @property
     def keep_headers(self) -> bool:
+
+        if self.tempfile_path:
+            if self.batch_number > 0:
+                return False
+            else:
+                return True
+
         if self.output in os.listdir("."):
             return False
         return True
