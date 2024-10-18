@@ -5,7 +5,7 @@ from tqdm import tqdm
 import os
 
 
-def extract_headers(xml_file):
+def getting_headers(xml_file):
     headers = set()
     tag = "row"
 
@@ -61,4 +61,4 @@ if __name__ == "__main__":
         help="Path to the XML file (e.g., Posts.xml).",
     )
     args = parser.parse_args()
-    extract_headers(args.xml_file)
+    getting_headers(args.xml_file)
