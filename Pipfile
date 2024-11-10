@@ -12,6 +12,7 @@ pytest = "*"
 bigframes = "*"
 appnope = "*"
 seaborn = "*"
+networkx = "*"
 
 [dev-packages]
 ipykernel = "*"
