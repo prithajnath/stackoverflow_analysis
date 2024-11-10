@@ -1,5 +1,8 @@
 .env
-*.csv
+data/*.parquet
+data/*.csv
+data/old/*.csv
+data_users/*.csv
 *.xml
 *.json
-!test_Posts.xml
+__pycache__/

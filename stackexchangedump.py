@@ -122,6 +122,7 @@ class StackOverflowDump:
         root_name,
         batch_size,
         backend,
+        sep,
         output=None,
         parser: Optional[StackExchangeParser] = None,
         tempfile_path: Optional[str] = None,
@@ -131,8 +132,9 @@ class StackOverflowDump:
         self.parser = parser
         self.progress = progress
         self.filename = filename
-        self.output = f"{root_name}.csv" if not output else output
+        self.output = f"data/{root_name}.csv" if not output else output
         self.backend = backend
+        self.sep = sep
         self.root = root_name
         self.root_open = f"<{root_name}>"
         self.root_close = f"</{root_name}>"
@@ -159,9 +161,20 @@ class StackOverflowDump:
             df = pd.read_xml(StringIO(xml))
         if self.backend == "csv":
             csv_string = StringIO()
-            df.to_csv(csv_string, header=self.keep_headers, index=False, na_rep="")
-            with open(self.output, "a") as g:
-                g.write(csv_string.getvalue())
+            try:
+                df.to_csv(
+                    csv_string,
+                    header=self.keep_headers,
+                    index=False,
+                    na_rep="",
+                    sep=self.sep,
+                )
+                with open(self.output, "a", encoding="utf-8") as g:
+                    g.write(csv_string.getvalue())
+            except Exception as e:
+                logger.error(f"Error writing to csv: {e}")
+            finally:
+                csv_string.close()
         elif self.backend == "bq":
             pandas_gbq.to_gbq(
                 df,
@@ -193,7 +206,7 @@ class StackOverflowDump:
 
                 logger.info(f"Picking up batch {offset} from {ts}")
 
-        with open(self.filename, "r") as f:
+        with open(self.filename, "r", encoding="utf-8") as f:
             for i, line in enumerate(f):
                 # Skip first two lines
                 if i > 1 and self.root_close not in line:
@@ -224,7 +237,7 @@ class StackOverflowDump:
 
     @property
     def progress_filename(self) -> str:
-        return f"{self.root}_progress.csv"
+        return f"data/{self.root}_progress.csv"
 
     def write_to_progress_file(self, signum, frame):
         fieldnames = ["batch_size", "batch_number", "ts"]
