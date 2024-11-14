@@ -2,7 +2,7 @@
 data/*.parquet
 data/*.csv
 data/old/*.csv
-data_users/*.csv
+data_users/*
 *.xml
 *.json
 __pycache__/
