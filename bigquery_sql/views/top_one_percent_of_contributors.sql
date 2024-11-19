@@ -32,4 +32,4 @@ from
     cte2 a
     join `social-computing-436902.stackexchange.stackoverflow_users` as b on a.OwnerUserId = b.Id
 where
-    Pctile >= 99;
+    Pctile = 100;
